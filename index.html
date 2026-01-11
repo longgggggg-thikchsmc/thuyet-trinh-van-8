@@ -176,12 +176,14 @@
 
     function nextSlide() { showSlide(currentSlide + 1); }
     function prevSlide() { showSlide(currentSlide - 1); }
+    
     function toggleChat() {
         const win = document.getElementById('chat-window');
         win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
     }
 
     let chatHistory = [];
+
     async function callGemini(message) {
         chatHistory.push({ role: "user", parts: [{ text: message }] });
         try {
@@ -190,11 +192,28 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ history: chatHistory })
             });
+            
             const data = await response.json();
-            const reply = data.candidates[0].content.parts[0].text;
+
+            // Kiểm tra lỗi từ phía API trả về
+            if (data.error) {
+                console.error("Lỗi API:", data.error);
+                return "Bệ hạ ơi, có lỗi rồi: " + (data.error.message || "Không xác định");
+            }
+
+            // Lấy câu trả lời một cách an toàn
+            const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            
+            if (!reply) {
+                return "Thần không nghe rõ, Bệ hạ có thể nhắc lại không ạ?";
+            }
+
             chatHistory.push({ role: "model", parts: [{ text: reply }] });
             return reply;
-        } catch (e) { return "Bot đang bận học bài, bạn thử lại sau nhé!"; }
+        } catch (e) { 
+            console.error("Lỗi Fetch:", e);
+            return "Kết nối bị ngắt, có thể do chưa cấu hình API Key trên Vercel!"; 
+        }
     }
 
     document.getElementById('send-chat').onclick = async () => {
@@ -203,25 +222,31 @@
         if (!text) return;
 
         const messages = document.getElementById('chat-messages');
+        
+        // Hiển thị tin nhắn người dùng
         const userDiv = document.createElement('div');
         userDiv.className = 'msg user-msg';
         userDiv.innerText = text;
         messages.appendChild(userDiv);
         input.value = '';
+        messages.scrollTop = messages.scrollHeight;
 
+        // Gọi AI và hiển thị tin nhắn bot
         const reply = await callGemini(text);
         const botDiv = document.createElement('div');
         botDiv.className = 'msg bot-msg';
-        botDiv.innerHTML = marked.parse(reply);
+        
+        // Sử dụng marked để hiển thị định dạng Markdown (nếu có)
+        botDiv.innerHTML = typeof marked !== 'undefined' ? marked.parse(reply) : reply;
+        
         messages.appendChild(botDiv);
         messages.scrollTop = messages.scrollHeight;
     };
     
+    // Hỗ trợ phím tắt điều khiển slide
     document.addEventListener('keydown', (e) => {
         if (e.key === "ArrowRight") nextSlide();
         if (e.key === "ArrowLeft") prevSlide();
     });
-</script>
-</body>
-          </html>
-  
+                </script>
+                
