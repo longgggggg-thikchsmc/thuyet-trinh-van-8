@@ -2,9 +2,5 @@
   "name": "thuyet-trinh-van-8",
   "version": "1.0.0",
   "type": "module",
-  "dependencies": {
-    "next": "latest",
-    "react": "latest",
-    "react-dom": "latest"
-  }
+  "dependencies": {}
 }
