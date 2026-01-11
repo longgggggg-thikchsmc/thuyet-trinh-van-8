@@ -1,8 +1,10 @@
 {
-  "name": "thuyet-trinh-chieu-doi-do",
+  "name": "thuyet-trinh-van-8",
   "version": "1.0.0",
+  "type": "module",
   "dependencies": {
-    "node-fetch": "^3.3.0"
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
   }
 }
-
